@@ -4,6 +4,10 @@
 #
 # http://shiny.rstudio.com
 #
+# Murray Cadzow
+# University of Otago
+# November 2016
+# 
 
 library(shiny)
 
@@ -17,14 +21,18 @@ shinyUI(fluidPage(
     sidebarPanel(
       fileInput("file", label = h3("Select VCF")),
       radioButtons('strand', label = 'Strand', c("Positive"='+', "Negative"='-' )),
-      numericInput('startpos', 'Position of start codon (bp)',value = NULL)
+      numericInput('startpos', 'Position of start codon (bp)',value = NULL),
+      numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 )
 
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
       textOutput("fn"),
-      plotOutput('distPlot')
+      br(), br(),
+      plotOutput('distPlot'),
+      br(), br(),
+      tableOutput('results')
     )
   )
 ))
