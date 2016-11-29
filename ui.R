@@ -20,12 +20,16 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       fileInput("file", label = h3("Select VCF")),
+      fileInput("bed", label = h3("Select BED (optional)")),
       radioButtons('strand', label = 'Strand', c("Positive"='+', "Negative"='-' )),
       numericInput('startpos', 'Position of start codon (bp)',value = NULL),
-      numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 )
-
-    ),
-
+      numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 ),
+      
+      h2('Save Plot'),
+      textInput('plotfilename','Plot file prefix', value = NULL ),
+      radioButtons('dev', label = "File type", c('png'='.png', 'pdf'='.pdf', 'svg'='.svg')),
+      submitButton(text = 'Save')
+      ),
     # Show a plot of the generated distribution
     mainPanel(
       textOutput("fn"),
