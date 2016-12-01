@@ -54,12 +54,12 @@ shinyServer(function(input, output) {
   create_freq <- reactive({
     vcf <- myData()
     if(is.null(vcf)) return(NULL)
-    
     if(input$strand == '-'){
       pos <- vcf$pos * -1 
     } else {
       pos <- vcf$pos
     }
+    
     return(data.frame(chr = vcf$chr, freq = vcf$af * 100, pos = pos))
   })
   
