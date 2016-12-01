@@ -16,8 +16,6 @@ options(shiny.maxRequestSize = 40 * 1024 ^2) # 40 Mb file limit
 shinyServer(function(input, output, session) {
   output$fn <-renderText({if(!is.null(input$file)){paste("You have selected:",input$file[1])}})
   
-  output$plot <- renderPlot(hist(c(1,2,1,1,2,2,11,1,1,1,1,1,1)))
-  output$plot2 <- renderPlot(hist(c(1,2,1,1,2,2,11,1,1,1,1,1,1)))
   #load and process data
   myData <- reactive({
     if(is.null(input$file)) return(NULL)
@@ -74,14 +72,19 @@ shinyServer(function(input, output, session) {
     return(p)
   }) 
   
-  # render plot
-  output$distplot2 <- output$distPlot <- renderPlot({
+  update_plot <- reactive({
     p <- create_plot()
     df <- filtered()
-    if(is.null(p)) return(NULL)
     if(!is.null(df) & !is.null(input$window) & input$window >= 10){
       p <- p + geom_rect(data = df, aes(xmin= pos,xmax = end, ymin = -Inf, ymax = Inf), colour = 'grey10', alpha = 0.1, linetype = 0, inherit.aes = FALSE)  
     }
+    p
+  })
+  
+  # render plot
+  output$distPlot <- renderPlot({
+    p <- update_plot()
+    if(is.null(p)) return(NULL)
     p
   })
   
@@ -89,24 +92,43 @@ shinyServer(function(input, output, session) {
   filtered <- reactive({
     df <- create_freq()
     if(is.null(df)) return(NULL)
-    df %>% filter(freq > 0) %>% select(pos) %>% 
+    df <- df %>% filter(freq > 0) %>% select(pos) %>% 
       mutate(diff = c(diff(pos),0)) %>% 
       mutate(end = pos + diff) %>% 
       select (pos, end, diff) %>% 
       filter(abs(diff) >= input$window)
+    df$diff <- abs(df$diff)
+    df
   })
   
   # create table of regions
   output$results <- renderTable(digits = 0,expr = {
     f <- filtered()
     if(is.null(f)) return(NULL)
-    f$diff <- abs(f$diff)
     f
   })
   
-  output$downloadPlot <- downloadHandler(filename = function(){paste0(input$plotfilename, input$dev)},
-                                         content = function(file){
-                                           ggsave(file, plot= renderPlot())
-                                         }
-                                         )
+  output$downloadTable <-downloadHandler(
+    filename = function() { 
+      if(is.null(input$tablefilename)){filename <- "data" 
+      } else {
+        filename <- input$tablefilename
+      }
+      paste(filename, '.csv', sep='') 
+    },
+    content = function(file) {
+      write.csv(filtered(), file)
+    })
+  
+  output$downloadPlot <- downloadHandler(filename = function(){
+    if(is.null(input$plotfilename)){
+      plotfilename <- "figure"
+    } else { 
+      plotfilename <- input$plotfilename
+    }
+    paste0(plotfilename, input$dev)},
+    content = function(file){
+      ggsave(file, plot= renderPlot())
+    }
+  )
 })

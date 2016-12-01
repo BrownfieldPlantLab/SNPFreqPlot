@@ -41,12 +41,11 @@ shinyUI(
                    wellPanel(
                    textInput('plotfilename','Plot file prefix', value = NULL ),
                    radioButtons('dev', label = "File type", c('png'='.png', 'pdf'='.pdf', 'svg'='.svg')),
-                   submitButton(text = 'Save')),
+                   downloadButton('downloadPlot', label = 'Save Plot')),
                    
                    wellPanel("Save Table",
-                             submitButton("Save Table")
+                             downloadButton('downloadTable', 'Download Table')
                              )
-                   
           )
         )
       ),
