@@ -11,32 +11,59 @@
 
 library(shiny)
 
-shinyUI(fluidPage(
 
-  # Application title
-  titlePanel("Plot VCF"),
 
-  # Sidebar with a slider input for number of bins
-  sidebarLayout(
-    sidebarPanel(
-      fileInput("file", label = h3("Select VCF")),
-      fileInput("bed", label = h3("Select BED (optional)")),
-      radioButtons('strand', label = 'Strand', c("Positive"='+', "Negative"='-' )),
-      numericInput('startpos', 'Position of start codon (bp)',value = NULL),
-      numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 ),
-      
-      h2('Save Plot'),
-      textInput('plotfilename','Plot file prefix', value = NULL ),
-      radioButtons('dev', label = "File type", c('png'='.png', 'pdf'='.pdf', 'svg'='.svg')),
-      submitButton(text = 'Save')
+
+# Application title
+shinyUI(
+  fluidPage(
+    titlePanel("Load VCF"),
+    # Sidebar with a slider input for number of bins
+    sidebarLayout(
+      sidebarPanel(
+        tabsetPanel(
+          tabPanel("Load",
+                   fileInput("file", label = h3("Select VCF")),
+                   fileInput("bed", label = h3("Select BED (optional)")),
+                   radioButtons('strand', label = 'Strand', c("Positive"='+', "Negative"='-' )),
+                   numericInput('startpos', 'Position of start codon (bp)',value = NULL)
+                   
+                   
+                   
+          ),
+          tabPanel("Options",
+                   numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 ),
+                   textInput("plotTitle", label = "Plot Title"),
+                   textInput("xtitle", label = "X Axis title"),
+                   textInput("ytitle", label = "Y Axis Title")
+          ),
+          tabPanel('Save',
+                   wellPanel(
+                   textInput('plotfilename','Plot file prefix', value = NULL ),
+                   radioButtons('dev', label = "File type", c('png'='.png', 'pdf'='.pdf', 'svg'='.svg')),
+                   submitButton(text = 'Save')),
+                   
+                   wellPanel("Save Table",
+                             submitButton("Save Table")
+                             )
+                   
+          )
+        )
       ),
-    # Show a plot of the generated distribution
-    mainPanel(
-      textOutput("fn"),
-      br(), br(),
-      plotOutput('distPlot'),
-      br(), br(),
-      tableOutput('results')
+      # Show a plot of the generated distribution
+      mainPanel(
+        textOutput("fn"),
+        br(),
+        plotOutput('distPlot'),
+        br(),
+        br(), br(),
+        tableOutput('results')
+        
+      )
     )
+    
   )
-))
+  
+)
+
+

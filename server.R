@@ -13,9 +13,11 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 options(shiny.maxRequestSize = 40 * 1024 ^2) # 40 Mb file limit
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   output$fn <-renderText({if(!is.null(input$file)){paste("You have selected:",input$file[1])}})
   
+  output$plot <- renderPlot(hist(c(1,2,1,1,2,2,11,1,1,1,1,1,1)))
+  output$plot2 <- renderPlot(hist(c(1,2,1,1,2,2,11,1,1,1,1,1,1)))
   #load and process data
   myData <- reactive({
     if(is.null(input$file)) return(NULL)
@@ -73,7 +75,7 @@ shinyServer(function(input, output) {
   }) 
   
   # render plot
-  output$distPlot <- renderPlot({
+  output$distplot2 <- output$distPlot <- renderPlot({
     p <- create_plot()
     df <- filtered()
     if(is.null(p)) return(NULL)
@@ -102,4 +104,9 @@ shinyServer(function(input, output) {
     f
   })
   
+  output$downloadPlot <- downloadHandler(filename = function(){paste0(input$plotfilename, input$dev)},
+                                         content = function(file){
+                                           ggsave(file, plot= renderPlot())
+                                         }
+                                         )
 })
