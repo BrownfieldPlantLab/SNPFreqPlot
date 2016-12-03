@@ -24,7 +24,7 @@ shinyUI(
         tabsetPanel(
           tabPanel("Load",
                    fileInput("file", label = h3("Select VCF")),
-                   fileInput("bed", label = h3("Select BED (optional)")),
+                   #fileInput("bed", label = h3("Select BED (optional)")),
                    radioButtons('strand', label = 'Strand', c("Positive"='+', "Negative"='-' )),
                    numericInput('startpos', 'Position of start codon (bp)',value = NULL)
                    
@@ -39,16 +39,17 @@ shinyUI(
           ),
           tabPanel('Save',
                    wellPanel(
-                   textInput('plotfilename','Plot file prefix', value = NULL ),
-                   numericInput("width", "Width"),
-                   numericInput("height","Height"),
-                   numericInput("dpi", "dpi"),
-                   radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg')),
-                   downloadButton('downloadPlot', label = 'Save Plot')),
+                     textInput('plotfilename','Plot file prefix', value = NULL ),
+                     numericInput("width", "Width", value = NULL),
+                     numericInput("height","Height", value = NULL),
+                                      radioButtons("units", label = "Units", c("px"="px", "mm"="mm"), inline=TRUE),
+                     numericInput("dpi", "dpi", value = 300),
+                                      radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg'),inline = TRUE),
+                     downloadButton('downloadPlot', label = 'Save Plot')),
                    
                    wellPanel("Save Table",
                              downloadButton('downloadTable', 'Download Table')
-                             )
+                   )
           )
         )
       ),

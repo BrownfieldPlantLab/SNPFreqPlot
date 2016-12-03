@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
       if(!is.null(input$height) & input$height > 0){
       height <- input$height
       } else { height <- 480}
-      ggsave(filename = file, plot= update_plot(), device = input$dev, width = width, height = height, dpi = dpi)
+      ggsave(filename = file, plot= update_plot(), device = input$dev, width = width, height = height, dpi = dpi, units = input$units)
     }
   )
 })
