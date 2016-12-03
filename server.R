@@ -4,7 +4,7 @@
 #
 # http://shiny.rstudio.com
 #
-# Murray Cadzow
+# Murray Cadzow and Ben Peters
 # University of Otago
 # November 2016
 #
