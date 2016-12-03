@@ -33,14 +33,17 @@ shinyUI(
           ),
           tabPanel("Options",
                    numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 ),
-                   textInput("plotTitle", label = "Plot Title"),
-                   textInput("xtitle", label = "X Axis title"),
-                   textInput("ytitle", label = "Y Axis Title")
+                   textInput("plotTitle", label = "Plot Title", value = NULL),
+                   textInput("xtitle", label = "X Axis title", value = NULL),
+                   textInput("ytitle", label = "Y Axis Title", value = NULL)
           ),
           tabPanel('Save',
                    wellPanel(
                    textInput('plotfilename','Plot file prefix', value = NULL ),
-                   radioButtons('dev', label = "File type", c('png'='.png', 'pdf'='.pdf', 'svg'='.svg')),
+                   numericInput("width", "Width"),
+                   numericInput("height","Height"),
+                   numericInput("dpi", "dpi"),
+                   radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg')),
                    downloadButton('downloadPlot', label = 'Save Plot')),
                    
                    wellPanel("Save Table",

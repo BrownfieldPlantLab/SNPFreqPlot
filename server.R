@@ -63,22 +63,57 @@ shinyServer(function(input, output, session) {
     return(data.frame(chr = vcf$chr, freq = vcf$af * 100, pos = pos))
   })
   
+  
+  
   # setup plot
   create_plot <- reactive({
     df <- create_freq()
     if(is.null(df)) return(NULL)
     p <- ggplot(df, aes(x = pos, y = freq)) +
-      geom_line() + ylim(c(0,100)) + xlab("Position (bp)") + ylab("Percentage Samples with SNP (%)") + theme_bw()
+      geom_line() + ylim(c(0,100)) + theme_bw()
+    
+    if(!is.null(input$plotTitle)){
+      p <- p + ggtitle(input$plotTitle)
+    }
+    if(!is.null(input$xtitle) & input$xtitle != ""){
+      p <- p + xlab(input$xtitle)
+    } else {
+      p <- p + xlab("Position (bp)") 
+    }
+    if(!is.null(input$ytitle) & input$ytitle != ""){
+      p <- p + ylab(input$ytitle)
+    } else {
+      p <- p + ylab("Percentage Samples with SNP (%)")
+    }
+    
+    
+    
+    if(is.null(input$startpos) | !is.numeric(input$startpos)) return(p)
+    if(input$strand == '-'){
+      sp <- input$startpos * -1
+    } else {
+      sp <- input$startpos
+    }
+    if(abs(sp) >= min(abs(df$pos), na.rm=TRUE ) & abs(sp) <= max(abs(df$pos), na.rm=TRUE)){
+      p <- p + geom_vline(xintercept=sp, colour = 'red')
+    }
+    
     return(p)
   }) 
   
   update_plot <- reactive({
     p <- create_plot()
     df <- filtered()
+    sp <- NA
+    if(is.null(p) | is.null(df)) return(NULL)
+    
     if(!is.null(df) & !is.null(input$window) & input$window >= 10){
       p <- p + geom_rect(data = df, aes(xmin= pos,xmax = end, ymin = -Inf, ymax = Inf), colour = 'grey10', alpha = 0.1, linetype = 0, inherit.aes = FALSE)  
     }
-    p
+    
+    
+    
+    return(p)
   })
   
   # render plot
@@ -120,15 +155,26 @@ shinyServer(function(input, output, session) {
       write.csv(filtered(), file)
     })
   
-  output$downloadPlot <- downloadHandler(filename = function(){
-    if(is.null(input$plotfilename)){
-      plotfilename <- "figure"
-    } else { 
-      plotfilename <- input$plotfilename
-    }
-    paste0(plotfilename, input$dev)},
+  output$downloadPlot <- downloadHandler(
+    filename = function(){
+      if(is.null(input$plotfilename) | input$plotfilename == ""){
+        plotfilename <- "figure"
+      } else { 
+        plotfilename <- input$plotfilename
+      }
+      paste0(plotfilename, '.',input$dev)
+    },
     content = function(file){
-      ggsave(file, plot= renderPlot())
+      if(!is.null(input$dpi) & input$dpi > 0){
+        dpi <- input$dpi
+      } else { dpi <- 300}
+      if(!is.null(input$width) & input$width > 0){
+      width <- input$width
+      } else { width = 480}
+      if(!is.null(input$height) & input$height > 0){
+      height <- input$height
+      } else { height <- 480}
+      ggsave(filename = file, plot= update_plot(), device = input$dev, width = width, height = height, dpi = dpi)
     }
   )
 })
