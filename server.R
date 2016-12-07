@@ -12,6 +12,7 @@
 library(shiny)
 library(ggplot2)
 library(dplyr)
+library(svglite)
 options(shiny.maxRequestSize = 40 * 1024 ^2) # 40 Mb file limit
 shinyServer(function(input, output, session) {
   output$fn <-renderText({if(!is.null(input$file)){paste("You have selected:",input$file[1])}})
@@ -72,6 +73,7 @@ shinyServer(function(input, output, session) {
     p <- ggplot(df, aes(x = pos, y = freq)) +
       geom_line() + ylim(c(0,100)) + theme_bw()
     
+    #plot titles
     if(!is.null(input$plotTitle)){
       p <- p + ggtitle(input$plotTitle)
     }
@@ -85,9 +87,15 @@ shinyServer(function(input, output, session) {
     } else {
       p <- p + ylab("Percentage Samples with SNP (%)")
     }
+    #plot title font sizes
+    p <- p + theme(plot.title = element_text(size = as.numeric(input$plotTitleSize), hjust = 0.5),
+                   axis.title.x = element_text(size = as.numeric(input$xTitleSize)),
+                   axis.text.x = element_text(size = as.numeric(input$xTitleSize) - 2),
+                   axis.title.y = element_text(size = input$yTitleSize),
+                   axis.text.y = element_text(size = as.numeric(input$yTitleSize) - 2)
+    )
     
-    
-    
+    #strand
     if(is.null(input$startpos) | !is.numeric(input$startpos)) return(p)
     if(input$strand == '-'){
       sp <- input$startpos * -1
@@ -169,10 +177,10 @@ shinyServer(function(input, output, session) {
         dpi <- input$dpi
       } else { dpi <- 300}
       if(!is.null(input$width) & input$width > 0){
-      width <- input$width
+        width <- input$width
       } else { width = 480}
       if(!is.null(input$height) & input$height > 0){
-      height <- input$height
+        height <- input$height
       } else { height <- 480}
       ggsave(filename = file, plot= update_plot(), device = input$dev, width = width, height = height, dpi = dpi, units = input$units)
     }
