@@ -10,7 +10,7 @@ if(!require("shiny")){
 }
 
 if(!require("svglite")){
-  install.packages("svglite")
+  install.packages("svglite") # may require some system libraries to be installed - check install messages if failing
 }
 
 if(!require("dplyr"){
