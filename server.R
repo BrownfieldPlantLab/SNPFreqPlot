@@ -15,40 +15,43 @@ library(dplyr)
 library(svglite)
 options(shiny.maxRequestSize = 40 * 1024 ^2) # 40 Mb file limit
 shinyServer(function(input, output, session) {
-  output$fn <-renderText({if(!is.null(input$file)){paste("You have selected:",input$file[1])}})
+  output$fn <-renderText({
+    if(is.null(input$file)) return(paste("Please select a file to load"))
+    paste("You have selected:",input$file[1])
+  })
   
   #load and process data
   myData <- reactive({
     if(is.null(input$file)) return(NULL)
     inFile <- input$file
     vcf <- read.table(inFile$datapath, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-    return(
-      data.frame(
-        t(
-          apply(vcf, 1, function(x){
-            gt<-unlist(
-              sapply(x[10:length(x)],function(y){
-                strsplit(x = y, split = ":")[[1]][1]} #pull out genotypes
-              )
-            )
-            n <- 2 * length(gt)
-            gt[gt == './.'] <- NA # replace missing genotypes with NA
-            a <- as.numeric(
-              unlist(
-                sapply(gt[!is.na(gt)],function(y){
-                  c(substring(y, 1,1), substring(y,3,3)) # pull out alleles
-                }
-                )
-              )
-            )
-            
-            alt <- sum(a > 0)
-            return(c(chr = as.numeric(x[1]),pos = as.numeric(x[2]),af = alt/n))
-          }
+    withProgress(message = 'Processing', value = 0, expr = {
+      results <- list()
+      for(row in 1:nrow(vcf)){
+        x <- vcf[row,]
+        gt<-unlist(
+          sapply(x[10:length(x)],function(y){
+            strsplit(x = y, split = ":")[[1]][1]} #pull out genotypes
           )
         )
+        n <- 2 * length(gt)
+        gt[gt == './.'] <- NA # replace missing genotypes with NA
+        a <- as.numeric(
+          unlist(
+            sapply(gt[!is.na(gt)],function(y){
+              c(substring(y, 1,1), substring(y,3,3)) # pull out alleles
+            }
+            )
+          )
+        )
+        alt <- sum(a > 0)
+        results[[row]] <- data.frame(chr = as.numeric(x[1]),pos = as.numeric(x[2]),af = alt/n)
+        incProgress(amount = 1/nrow(vcf))
+      }
+      return(
+        do.call(rbind, results)
       )
-    )
+    })
   })
   
   # adjust strand
@@ -115,11 +118,9 @@ shinyServer(function(input, output, session) {
     sp <- NA
     if(is.null(p) | is.null(df)) return(NULL)
     
-    if(!is.null(df) & !is.null(input$window) & input$window >= 10){
+    if(!is.null(df) & !is.null(input$window) & input$window >= 10 & !is.na(input$window)){
       p <- p + geom_rect(data = df, aes(xmin= pos,xmax = end, ymin = -Inf, ymax = Inf), colour = 'grey10', alpha = 0.1, linetype = 0, inherit.aes = FALSE)  
     }
-    
-    
     
     return(p)
   })
@@ -127,6 +128,7 @@ shinyServer(function(input, output, session) {
   # render plot
   output$distPlot <- renderPlot({
     p <- update_plot()
+    
     if(is.null(p)) return(NULL)
     p
   })
@@ -135,11 +137,16 @@ shinyServer(function(input, output, session) {
   filtered <- reactive({
     df <- create_freq()
     if(is.null(df)) return(NULL)
+    if(is.null(input$window) | is.na(input$window) | input$window == "" | input$window < 1){
+      window <- 1
+    } else{
+      window <- input$window
+    }
     df <- df %>% filter(freq > 0) %>% select(pos) %>% 
       mutate(diff = c(diff(pos),0)) %>% 
       mutate(end = pos + diff) %>% 
       select (pos, end, diff) %>% 
-      filter(abs(diff) >= input$window)
+      filter(abs(diff) >= window)
     df$diff <- abs(df$diff)
     df
   })
@@ -148,6 +155,8 @@ shinyServer(function(input, output, session) {
   output$results <- renderTable(digits = 0,expr = {
     f <- filtered()
     if(is.null(f)) return(NULL)
+    if(nrow(f) ==  0) return(NULL)
+    names(f) <- c("Start Position","End Position", "Window Size")
     f
   })
   

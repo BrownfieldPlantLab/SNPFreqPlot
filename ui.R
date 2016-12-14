@@ -32,7 +32,7 @@ shinyUI(
                    
           ),
           tabPanel("Options",
-                   numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1,min = 1 ),
+                   numericInput('window', 'Filter for number of consecutive bp with no snps',value = 1 ),
                    textInput("plotTitle", label = "Plot Title", value = NULL),
                    selectInput("plotTitleSize", label = "Plot Title Font Size", multiple = FALSE, choices = as.list(seq(8,42, by =2)), selected = 18),
                    textInput("xtitle", label = "X Axis title", value = NULL),
@@ -43,9 +43,9 @@ shinyUI(
           tabPanel('Save',
                    wellPanel(
                      textInput('plotfilename','Plot file prefix', value = NULL ),
+                     radioButtons("units", label = "Units", c("in"="in", "cm"="cm", "mm"="mm"), inline=TRUE),
                      numericInput("width", "Width", value = 8, min = 0, max=50),
                      numericInput("height","Height", value = 8, min=0, max = 50),
-                                      radioButtons("units", label = "Units", c("in"="in", "cm"="cm", "mm"="mm"), inline=TRUE),
                      numericInput("dpi", "dpi", value = 300),
                                       radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg'),inline = TRUE),
                      downloadButton('downloadPlot', label = 'Save Plot')),
