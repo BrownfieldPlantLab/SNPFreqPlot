@@ -171,7 +171,7 @@ shinyServer(function(input, output, session) {
       mutate(end = pos + diff) %>% 
       select (pos, end, diff)
     df$diff <- abs(df$diff)
-    if(window > max(df$diff)){
+    if(window < max(df$diff)){
       df <-df %>% filter(abs(diff) >= window)
     }
     df
