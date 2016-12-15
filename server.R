@@ -58,13 +58,17 @@ shinyServer(function(input, output, session) {
   create_freq <- reactive({
     vcf <- myData()
     if(is.null(vcf)) return(NULL)
-    if(input$strand == '-'){
-      pos <- vcf$pos * -1 
-    } else {
-      pos <- vcf$pos
-    }
+      pos <- vcf$pos * strand()
+    
     
     return(data.frame(chr = vcf$chr, freq = vcf$af * 100, pos = pos))
+  })
+  
+  
+  #strand function
+  strand <- reactive({
+    if(input$strand == '-') return(-1)
+    return(1)
   })
   
   
@@ -98,13 +102,33 @@ shinyServer(function(input, output, session) {
                    axis.text.y = element_text(size = as.numeric(input$yTitleSize) - 2)
     )
     
+    if(!is.null(input$start_xlim) & !is.na(input$start_xlim) & abs(input$start_xlim) >= min(abs(df$pos)) & abs(input$start_xlim) <= max(abs(df$pos))){
+      x_start <- input$start_xlim *strand()
+    } else {
+      if(strand() == -1){
+        x_start <- max(df$pos, na.rm=TRUE)
+      } else{
+        x_start <- min(df$pos, na.rm=TRUE)
+      }
+    }
+    
+    if(!is.null(input$end_xlim) & !is.na(input$end_xlim) & abs(input$end_xlim) >= min(abs(df$pos)) & abs(input$end_xlim) <= max(abs(df$pos))){
+      x_end <- input$end_xlim *strand()
+    } else {
+      if(strand() == -1){
+        x_end <- min(df$pos, na.rm=TRUE)
+      }else{
+        x_end <- max(df$pos, na.rm=TRUE)
+      }
+    }
+    x_range <- c(x_start, x_end)
+    
+    p <- p + coord_cartesian(xlim = c(min(x_range), max(x_range)) )
+    
     #strand
     if(is.null(input$startpos) | !is.numeric(input$startpos)) return(p)
-    if(input$strand == '-'){
-      sp <- input$startpos * -1
-    } else {
-      sp <- input$startpos
-    }
+    sp <- input$startpos * strand()
+
     if(abs(sp) >= min(abs(df$pos), na.rm=TRUE ) & abs(sp) <= max(abs(df$pos), na.rm=TRUE)){
       p <- p + geom_vline(xintercept=sp, colour = 'red')
     }
@@ -145,9 +169,11 @@ shinyServer(function(input, output, session) {
     df <- df %>% filter(freq > 0) %>% select(pos) %>% 
       mutate(diff = c(diff(pos),0)) %>% 
       mutate(end = pos + diff) %>% 
-      select (pos, end, diff) %>% 
-      filter(abs(diff) >= window)
+      select (pos, end, diff)
     df$diff <- abs(df$diff)
+    if(window > max(df$diff)){
+      df <-df %>% filter(abs(diff) >= window)
+    }
     df
   })
   

@@ -26,7 +26,7 @@ shinyUI(
                    fileInput("file", label = h3("Select VCF")),
                    #fileInput("bed", label = h3("Select BED (optional)")),
                    radioButtons('strand', label = 'Strand', c("Positive"='+', "Negative"='-' )),
-                   numericInput('startpos', 'Position of start codon (bp)',value = NULL)
+                   numericInput('startpos', 'Highlight position of start codon (bp)',value = NULL)
                    
                    
                    
@@ -38,16 +38,18 @@ shinyUI(
                    textInput("xtitle", label = "X Axis title", value = NULL),
                    selectInput("xTitleSize", label = "X Title Font Size", multiple = FALSE, choices = as.list(seq(8,42, by =2)), selected = 16),
                    textInput("ytitle", label = "Y Axis Title", value = NULL),
-                   selectInput("yTitleSize", label = "Y Title Font Size", multiple = FALSE, choices = as.list(seq(8,42, by =2)), selected = 16)
+                   selectInput("yTitleSize", label = "Y Title Font Size", multiple = FALSE, choices = as.list(seq(8,42, by =2)), selected = 16),
+                   numericInput('start_xlim', label = "Zoom plot - |Start bp|",value=NULL, min = 0),
+                   numericInput('end_xlim', label = 'Zoom plot - |End bp|', value=NULL, min = 0)
           ),
           tabPanel('Save',
                    wellPanel(
                      textInput('plotfilename','Plot file prefix', value = NULL ),
                      radioButtons("units", label = "Units", c("in"="in", "cm"="cm", "mm"="mm"), inline=TRUE),
-                     numericInput("width", "Width", value = 8, min = 0, max=50),
-                     numericInput("height","Height", value = 8, min=0, max = 50),
+                     numericInput("width", "Width", value = 9, min = 0, max=50),
+                     numericInput("height","Height", value = 6, min=0, max = 50),
                      numericInput("dpi", "dpi", value = 300),
-                                      radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg'),inline = TRUE),
+                     radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg'),inline = TRUE),
                      downloadButton('downloadPlot', label = 'Save Plot')),
                    
                    wellPanel("Save Table",
