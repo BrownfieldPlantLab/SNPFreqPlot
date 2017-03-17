@@ -1,7 +1,7 @@
 # SNPFreqPlot
 A plotting app to visualise the SNPs across a region
 
-A hosted version of the app can be found here: http://biocrstudio.otago.ac.nz:3838/snpfreqplot/
+A hosted version of the app can be found here: http://snpfreqplot.otago.ac.nz/SNPFreqPlot/
 
 To run locally using R
 
