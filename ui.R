@@ -57,6 +57,7 @@ shinyUI(
                    )
           )
         )
+       
       ),
       # Show a plot of the generated distribution
       mainPanel(
@@ -68,8 +69,10 @@ shinyUI(
         tableOutput('results')
         
       )
-    )
-    
+    ),
+    p("If you use this app please cite as"),
+    p("Peters B., Aidley J., Cadzow M., Twell D., Brownfield L. (2017) Identification of Cis-Regulatory Modules that Function in the Male Germline of Flowering Plants. In: Schmidt A. (eds) Plant Germline Development. Methods in Molecular Biology, vol 1669. Humana Press, New York, NY"),
+    HTML("<p>DOI <a href='https://doi.org/10.1007/978-1-4939-7286-9_22'> https://doi.org/10.1007/978-1-4939-7286-9_22</a></p>" )
   )
   
 )
