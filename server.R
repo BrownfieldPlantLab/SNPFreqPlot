@@ -6,7 +6,7 @@
 #
 # Murray Cadzow and Ben Peters
 # University of Otago
-# November 2016
+# November 2016 updated June 2021
 #
 
 library(shiny)
@@ -76,7 +76,11 @@ shinyServer(function(input, output, session) {
   # setup plot
   create_plot <- reactive({
     df <- create_freq()
+    
+    # no data so don't plot anything
     if(is.null(df)) return(NULL)
+    
+
     p <- ggplot(df, aes(x = pos, y = freq)) +
       geom_line() + ylim(c(0,100)) + theme_bw()
     
@@ -140,7 +144,11 @@ shinyServer(function(input, output, session) {
     p <- create_plot()
     df <- filtered()
     sp <- NA
+    
+    # either no data to start with or data was completely removed by filtering
     if(is.null(p) | is.null(df)) return(NULL)
+    if(nrow(df) == 0) return(NULL)
+    
     
     if(!is.null(df) & !is.null(input$window) & input$window >= 10 & !is.na(input$window)){
       p <- p + geom_rect(data = df, aes(xmin= pos,xmax = end, ymin = -Inf, ymax = Inf), colour = 'grey10', alpha = 0.1, linetype = 0, inherit.aes = FALSE)  
@@ -169,19 +177,17 @@ shinyServer(function(input, output, session) {
     df <- df %>% filter(freq > 0) %>% select(pos) %>% 
       mutate(diff = c(diff(pos),0)) %>% 
       mutate(end = pos + diff) %>% 
+      mutate(diff = abs(diff)) %>% 
       select (pos, end, diff)
-    df$diff <- abs(df$diff)
-    if(window < max(df$diff)){
-      df <-df %>% filter(abs(diff) >= window)
-    }
-    df
+  # filter data based on user inputted window size
+    return(df %>% filter(diff >= window))
   })
   
   # create table of regions
   output$results <- renderTable(digits = 0,expr = {
     f <- filtered()
     if(is.null(f)) return(NULL)
-    if(nrow(f) ==  0) return(NULL)
+    
     names(f) <- c("Start Position","End Position", "Window Size")
     f
   })
