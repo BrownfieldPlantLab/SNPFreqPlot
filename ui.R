@@ -49,7 +49,7 @@ shinyUI(
                      numericInput("width", "Width", value = 9, min = 0, max=50),
                      numericInput("height","Height", value = 6, min=0, max = 50),
                      numericInput("dpi", "dpi", value = 300),
-                     radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf', 'svg'='svg'),inline = TRUE),
+                     radioButtons('dev', label = "File type", c('png'='png', 'pdf'='pdf'),inline = TRUE),
                      downloadButton('downloadPlot', label = 'Save Plot')),
                    
                    wellPanel("Save Table",
